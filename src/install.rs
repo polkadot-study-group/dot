@@ -140,7 +140,7 @@ pub fn install_omni_node() -> Result<(), Box<dyn Error>> {
 }
 
 pub fn run_download_script<C: CommandRunner>(runner: &C, destination: &Path) -> Result<(), Box<dyn Error>>{
-    let url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/asset_hub_westend_runtime.compact.compressed.wasm";
+    let url = "https://binary.xode.net/westend";
 
     if file_exists(destination) {
         println!("Wasm file is available");

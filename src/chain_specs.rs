@@ -58,7 +58,7 @@ pub fn install_chain_spec_builder() -> Result<(), Box<dyn Error>> {
 
 
 pub fn gen_chain_spec(wasm_source_path: Option<&Path>, chain_spec_builder_path: Option<&Path>) -> Result<(), Box<dyn Error>> {
-    let wasm_path = wasm_source_path.unwrap_or_else(|| Path::new("./nodes/asset_hub_westend_runtime.compact.compressed.wasm"));
+    let wasm_path = wasm_source_path.unwrap_or_else(|| Path::new("./nodes/westend.wasm"));
     let builder_path = chain_spec_builder_path.unwrap_or_else(|| Path::new("./binaries/chain-spec-builder"));
 
     if !wasm_path.exists() {
@@ -86,7 +86,7 @@ pub fn gen_chain_spec(wasm_source_path: Option<&Path>, chain_spec_builder_path: 
         .args(&[
             "create",
             "--relay-chain", "westend2",
-            "--para-id", "1000",
+            "--para-id", "100",
             "--runtime", wasm_path.to_str().unwrap(),
             "named-preset", "development"
         ])
