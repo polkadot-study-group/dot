@@ -149,6 +149,10 @@ fn handle_serve(matches: &clap::ArgMatches) {
     if args.is_empty() {
         args = vec!["--chain".to_string(), "./chain-specs/chain_spec.json".to_string()];
     }
+    args.push("--base-path".to_string());
+    args.push("/tmp/node".to_string());
+    args.push("--dev".to_string());
+
 
     println!("Starting omni-node and eth-rpc concurrently...");
 

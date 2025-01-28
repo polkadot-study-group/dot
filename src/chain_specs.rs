@@ -87,8 +87,7 @@ pub fn gen_chain_spec(wasm_source_path: Option<&Path>, chain_spec_builder_path: 
     let _chain_spec_status = Command::new(builder_path)
         .args(&[
             "create",
-            "-t", "development",
-            "--relay-chain", "westend",
+            "--relay-chain", "westend2",
             "--para-id", "1000",
             "--runtime", wasm_path.to_str().unwrap(),
             "named-preset", "development"
