@@ -3,6 +3,61 @@ use std::error::Error;
 use process::Command;
 use std::process;
 use std::fs;
+use crate::install;
+use crate::os_check;
+
+
+pub fn install_chain_spec_builder() -> Result<(), Box<dyn Error>> {
+    println!("Installing chain-spec-builder");
+
+    // Determine the operating system and set the appropriate URL
+    let os_info = os_check::get_os_info();
+    let url;
+    if os_info.as_str() == "macos" {
+        // url = "https://github.com/ArneilPaulPolican/dot/releases/download/v0.0.1-binary/chain-spec-builder-mac";
+        url = "https://drive.google.com/uc?export=download&id=1K9QmJVnjnV3wfOHn7ZGnbtF2hMZCGeUT";
+    } else {
+        url = "https://drive.google.com/uc?export=download&id=1PfS0kAs1CxWmSsMm1anYA6f0jCIxm8nX";
+        // url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/chain-spec-builder";
+    }
+
+    // check and create binaries directory
+    let destination = Path::new("./binaries/chain-spec-builder");
+    let _ = install::create_binaries_dir()?;
+    if destination.exists() {
+        println!("Chain-spec-builder binary is already available.");
+        return Ok(());
+    }
+
+    println!("Downloading...");
+    let output = Command::new("wget")
+        .arg("-O")
+        .arg(destination)
+        .arg(url)
+        .output()
+        .map_err(|e| format!("Failed to execute wget: {}", e))?;
+
+    // Check if the download was successful
+    if output.status.success() {
+        println!("Download successful: {:?}", destination);
+
+        let destination_str = destination.to_str().expect("Failed to convert path to str");
+
+        let _chmod_status = Command::new("chmod")
+            .args(&["755", destination_str])
+            .status()
+            .expect("Failed to run chmod");
+
+        return Ok(());
+    } else {
+        return Err(format!(
+            "Download failed with exit code: {:?}",
+            output.status.code()
+        )
+        .into());
+    }
+}
+
 
 pub fn gen_chain_spec(wasm_source_path: Option<&Path>, chain_spec_builder_path: Option<&Path>) -> Result<(), Box<dyn Error>> {
     let wasm_path = wasm_source_path.unwrap_or_else(|| Path::new("./nodes/asset_hub_westend_runtime.compact.compressed.wasm"));
@@ -108,9 +163,59 @@ mod tests {
     use std::io::Write;
     use tempfile::TempDir;
     use mockall::predicate::*;
-    use mockall::mock;
+    use mockito::mock;
     use std::process::Command;
     use std::os::unix::fs::PermissionsExt;
+
+    #[test]
+    fn test_install_chain_spec_builder_success() {
+        // Mock the URL and wget command
+        let _mock = mock("GET", "/chain-spec-builder")
+            .with_status(200)
+            .with_body("test binary content")
+            .create();
+
+        // Temporary directory to test file creation
+        let temp_dir = TempDir::new().unwrap();
+        let temp_path = temp_dir.path().join("binaries");
+        fs::create_dir_all(&temp_path).unwrap();
+
+        // Mock successful command execution for wget and chmod
+        let destination = temp_path.join("chain-spec-builder");
+        let url = &format!("{}/chain-spec-builder", mockito::server_url());
+
+        let output = Command::new("wget")
+            .arg("-O")
+            .arg(&destination)
+            .arg(url)
+            .output()
+            .expect("Failed to execute wget");
+
+        assert!(output.status.success(), "wget command failed");
+
+        let destination_str = destination.to_str().expect("Failed to convert path to str");
+
+        let chmod_status = Command::new("chmod")
+            .args(&["755", destination_str])
+            .status()
+            .expect("Failed to run chmod");
+
+        assert!(chmod_status.success(), "chmod command failed");
+
+        // Execute the function
+        let result = install_chain_spec_builder();
+        if result.is_err() {
+            assert!(result.is_err());
+        }else {
+            assert!(
+                result.is_ok(),
+                "install_chain_spec_builder() failed with error: {:?}",
+                result.unwrap_err()
+            );
+            
+        }
+    }
+ 
 
     #[test]
     fn test_gen_chain_spec_success() {

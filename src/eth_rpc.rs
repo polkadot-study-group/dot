@@ -3,6 +3,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use crate::os_check;
+
 pub struct EthRpcInstaller {
     url: String,
     binaries_dir: PathBuf,
@@ -10,7 +12,14 @@ pub struct EthRpcInstaller {
 }
 
 impl EthRpcInstaller {
-    pub fn new(url: &str, binaries_dir: &str, binary_name: &str) -> Self {
+    pub fn new( binaries_dir: &str, binary_name: &str) -> Self {
+        let os_info = os_check::get_os_info();
+        let url;
+        if os_info.as_str() == "macos"  {
+            url = "https://drive.google.com/uc?export=download&id=1JVJbzaLVgpaSl4-DygPncJpUOg_9OPxX";
+        }else {
+            url = "https://drive.google.com/uc?export=download&id=18mN2cIJfLVzEWiGdzV8E6jjUZP-wt8Hi";
+        }
         Self {
             url: url.to_string(),
             binaries_dir: PathBuf::from(binaries_dir),
@@ -87,14 +96,13 @@ mod tests {
     fn test_install_eth_rpc_success() {
         let test_dir = env::temp_dir().join("test_binaries");
         let binary_name = "eth-rpc-test";
-        let url = "https://github.com/ArneilPaulPolican/dot/releases/download/v0.0.1-binary/eth-rpc"; // Use a mock server or stub for testing
 
         // Ensure a clean state
         if test_dir.exists() {
             fs::remove_dir_all(&test_dir).unwrap();
         }
 
-        let installer = EthRpcInstaller::new(&url, test_dir.to_str().unwrap(), binary_name);
+        let installer = EthRpcInstaller::new( test_dir.to_str().unwrap(), binary_name);
 
         // Mock the Command executions (e.g., wget and chmod) using tools like `assert_cmd` or by wrapping Command calls
         let result = installer.install();

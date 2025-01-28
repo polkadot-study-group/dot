@@ -4,6 +4,7 @@ use std::process::Stdio;
 use std::path::Path;
 use std::error::Error;
 use crate::os_check;
+use crate::chain_specs;
 
 // MOCK COMMAND RUNNER  
 // Define a trait for running commands
@@ -64,57 +65,6 @@ pub fn install_polkadot<C: CommandRunner>(_runner: &C) -> Result<(), Box<dyn Err
     Ok(()) 
 }
 
-// test_install_chain_spec_builder_success
-// test_create_binaries_directory - create a temporary directory for binaries/
-pub fn install_chain_spec_builder() -> Result<(), Box<dyn Error>> {
-    println!("Installing chain-spec-builder");
-
-    // Determine the operating system and set the appropriate URL
-    let os_info = os_check::get_os_info();
-    let url;
-    if os_info.as_str() == "macos" {
-        url = "https://github.com/ArneilPaulPolican/dot/releases/download/v0.0.1-binary/chain-spec-builder";
-    } else {
-        url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/chain-spec-builder";
-    }
-
-    // check and create binaries directory
-    let destination = Path::new("./binaries/chain-spec-builder");
-    let _ = create_binaries_dir()?;
-    if destination.exists() {
-        println!("Chain-spec-builder binary is already available.");
-        return Ok(());
-    }
-
-    println!("Downloading...");
-    let output = Command::new("wget")
-        .arg("-O")
-        .arg(destination)
-        .arg(url)
-        .output()
-        .map_err(|e| format!("Failed to execute wget: {}", e))?;
-
-    // Check if the download was successful
-    if output.status.success() {
-        println!("Download successful: {:?}", destination);
-
-        let destination_str = destination.to_str().expect("Failed to convert path to str");
-
-        let _chmod_status = Command::new("chmod")
-            .args(&["755", destination_str])
-            .status()
-            .expect("Failed to run chmod");
-
-        return Ok(());
-    } else {
-        return Err(format!(
-            "Download failed with exit code: {:?}",
-            output.status.code()
-        )
-        .into());
-    }
-}
-
 pub fn create_binaries_dir() -> Result<(), Box<dyn Error>> {
     
     // Check if the 'binaries' directory exists, if not, create it
@@ -145,7 +95,7 @@ pub fn install_omni_node() -> Result<(), Box<dyn Error>> {
     let os_info = os_check::get_os_info();
     let url ;
     if os_info.as_str() == "macos" {
-        url = "https://github.com/ArneilPaulPolican/dot/releases/download/v0.0.1-binary/polkadot-omni-node";
+        url = "https://drive.google.com/uc?export=download&id=1KjarMs-UOvdQgC4r6w5H0EGWeRGOwauo";
     } else {
         url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/polkadot-omni-node";
     }
@@ -235,7 +185,6 @@ pub fn download_file<C: CommandRunner>(runner: &C, url: &str, destination: &Path
 }
 
 
-
 /// =================================================================================================
 /// Test Module
 /// =================================================================================================
@@ -249,10 +198,10 @@ mod tests {
     use std::process::{Command, Output};
     use mockito::mock;
     use std::fs::{File, create_dir_all};
-    use crate::install::{install_polkadot, install_chain_spec_builder, install_omni_node, run_download_script, create_binaries_dir, 
+    use crate::install::{install_polkadot,  install_omni_node, run_download_script, create_binaries_dir, 
                         ensure_directory_exists, download_file, check_binary, CommandRunner};
     use crate::process::Stdio;
-    use crate::os_check::{check_operating_system, get_os_info, is_wsl};
+    use crate::os_check::{check_operating_system};
     use std::path::PathBuf;
     use std::error::Error;
 
@@ -393,55 +342,7 @@ mod tests {
     }
 
  
-    #[test]
-    fn test_install_chain_spec_builder_success() {
-        // Mock the URL and wget command
-        let _mock = mock("GET", "/chain-spec-builder")
-            .with_status(200)
-            .with_body("test binary content")
-            .create();
 
-        // Temporary directory to test file creation
-        let temp_dir = TempDir::new().unwrap();
-        let temp_path = temp_dir.path().join("binaries");
-        fs::create_dir_all(&temp_path).unwrap();
-
-        // Mock successful command execution for wget and chmod
-        let destination = temp_path.join("chain-spec-builder");
-        let url = &format!("{}/chain-spec-builder", mockito::server_url());
-
-        let output = Command::new("wget")
-            .arg("-O")
-            .arg(&destination)
-            .arg(url)
-            .output()
-            .expect("Failed to execute wget");
-
-        assert!(output.status.success(), "wget command failed");
-
-        let destination_str = destination.to_str().expect("Failed to convert path to str");
-
-        let chmod_status = Command::new("chmod")
-            .args(&["755", destination_str])
-            .status()
-            .expect("Failed to run chmod");
-
-        assert!(chmod_status.success(), "chmod command failed");
-
-        // Execute the function
-        let result = install_chain_spec_builder();
-        if result.is_err() {
-            assert!(result.is_err());
-        }else {
-            assert!(
-                result.is_ok(),
-                "install_chain_spec_builder() failed with error: {:?}",
-                result.unwrap_err()
-            );
-            
-        }
-    }
- 
     // Test if 'binaries' directory is created when it doesn't exist
     #[test]
     fn test_create_binaries_directory() {

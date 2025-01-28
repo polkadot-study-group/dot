@@ -89,14 +89,12 @@ pub fn install(_template: &str){
     let chain_spec_builder_path = Path::new("./binaries/chain-spec-builder");
     let destination = Path::new("./nodes/asset_hub_westend_runtime.compact.compressed.wasm");
 
-    let eth_url = "https://github.com/ArneilPaulPolican/dot/releases/download/v0.0.1-binary/eth-rpc";
-    let binary_name = "eth-rpc";
-    let installer = EthRpcInstaller::new(eth_url, binaries_dir, binary_name);
+    let installer = EthRpcInstaller::new(binaries_dir, "eth-rpc");
     let eth_installer_result = installer.install();
 
     let real_runner = RealCommandRunner;
     results.push((install::install_polkadot(&real_runner), "$ Polkadot installation"));
-    results.push((install::install_chain_spec_builder(), "$ Chain spec builder installation"));
+    results.push((chain_specs::install_chain_spec_builder(), "$ Chain spec builder installation"));
     results.push((install::install_omni_node(), "$ Omni-node installation"));
     results.push((eth_installer_result, "$ Eth-rpc installation"));
     results.push((install::run_download_script(&real_runner, &destination ), "$ Wasm file download script"));
