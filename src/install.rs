@@ -95,7 +95,7 @@ pub fn install_omni_node() -> Result<(), Box<dyn Error>> {
     let os_info = os_check::get_os_info();
     let url ;
     if os_info.as_str() == "macos" {
-        url = "https://drive.google.com/uc?export=download&id=1KjarMs-UOvdQgC4r6w5H0EGWeRGOwauo";
+        url = "https://binary.xode.net/polkadot-omni-node-mac";
     } else {
         url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/polkadot-omni-node";
     }

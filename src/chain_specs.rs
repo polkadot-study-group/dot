@@ -14,11 +14,9 @@ pub fn install_chain_spec_builder() -> Result<(), Box<dyn Error>> {
     let os_info = os_check::get_os_info();
     let url;
     if os_info.as_str() == "macos" {
-        // url = "https://github.com/ArneilPaulPolican/dot/releases/download/v0.0.1-binary/chain-spec-builder-mac";
         url = "https://drive.google.com/uc?export=download&id=1K9QmJVnjnV3wfOHn7ZGnbtF2hMZCGeUT";
     } else {
         url = "https://drive.google.com/uc?export=download&id=1PfS0kAs1CxWmSsMm1anYA6f0jCIxm8nX";
-        // url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/chain-spec-builder";
     }
 
     // check and create binaries directory
