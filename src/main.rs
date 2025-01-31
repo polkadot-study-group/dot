@@ -95,9 +95,9 @@ pub fn install(_template: &str){
     let mut results: Vec<(Result<(), Box<dyn Error>>, &str)> = Vec::new();
     let binaries_dir = "./binaries";
     
-    let wasm_source_path =  Path::new("./nodes/asset_hub_westend_runtime.compact.compressed.wasm");
+    let wasm_source_path =  Path::new("./nodes/westend.wasm");
     let chain_spec_builder_path = Path::new("./binaries/chain-spec-builder");
-    let destination = Path::new("./nodes/asset_hub_westend_runtime.compact.compressed.wasm");
+    let destination = Path::new("./nodes/westend.wasm");
 
     let installer = EthRpcInstaller::new(binaries_dir, "eth-rpc");
     let eth_installer_result = installer.install();
