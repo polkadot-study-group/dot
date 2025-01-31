@@ -140,7 +140,7 @@ pub fn install_omni_node() -> Result<(), Box<dyn Error>> {
 }
 
 pub fn run_download_script<C: CommandRunner>(runner: &C, destination: &Path) -> Result<(), Box<dyn Error>>{
-    let url = "https://binary.xode.net/westend";
+    let url = "https://drive.google.com/uc?export=download&id=1oLX2O6lM2A00MImP3jWWeIcdECb4ZwB-";
 
     if file_exists(destination) {
         println!("Wasm file is available");
