@@ -51,12 +51,22 @@ fn main() {
                         .index(1),
                 )
         )
+        .subcommand(
+            Command::new("compile")
+                .about("Compile smart contract")
+        )
+        .subcommand(
+            Command::new("deploy")
+                .about("Deploy smart contract")
+        )
     .get_matches();
 
 
     match matches.subcommand() {
         Some(("install", sub_matches)) => handle_install(sub_matches),
         Some(("serve", sub_matches)) => handle_serve(sub_matches),
+        Some(("compile", sub_matches)) => handle_compile(sub_matches),
+        Some(("deploy", sub_matches)) => handle_deploy(sub_matches),
         _ => {
             eprintln!("No valid subcommand provided. Use --help for more information.");
             process::exit(1);
@@ -172,4 +182,21 @@ fn handle_serve(matches: &clap::ArgMatches) {
     handle_run_eth.join().expect("Failed to join run_eth thread");
 
     process::exit(0);
+}
+
+
+fn handle_compile(matches: &clap::ArgMatches) {
+    let args: Vec<&str> = matches.get_many::<String>("args")
+        .map(|values| values.map(|s| s.as_str()).collect())
+        .unwrap_or_else(|| Vec::new());
+
+    println!("Called compile");
+}
+
+fn handle_deploy(matches: &clap::ArgMatches) {
+    let args: Vec<&str> = matches.get_many::<String>("args")
+        .map(|values| values.map(|s| s.as_str()).collect())
+        .unwrap_or_else(|| Vec::new());
+
+    println!("Called deploy");
 }
