@@ -97,7 +97,8 @@ pub fn install_omni_node() -> Result<(), Box<dyn Error>> {
     if os_info.as_str() == "macos" {
         url = "https://binary.xode.net/polkadot-omni-node-mac";
     } else {
-        url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/polkadot-omni-node";
+        // url = "https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-stable2412/polkadot-omni-node";
+        url = "https://binary.xode.net/substrate-node";
     }
 
     // Destination file path

@@ -156,11 +156,11 @@ fn handle_serve(matches: &clap::ArgMatches) {
         .map(|s| s.split_whitespace().map(|s| s.to_string()).collect())
         .unwrap_or_else(|| vec![]);  
 
-    if args.is_empty() {
-        args = vec!["--chain".to_string(), "./chain-specs/chain_spec.json".to_string()];
-    }
+    // if args.is_empty() {
+    //     args = vec!["--chain".to_string(), "./chain-specs/chain_spec.json".to_string()];
+    // }
     args.push("--base-path".to_string());
-    args.push("/tmp/node".to_string());
+    args.push("./data".to_string());
     args.push("--dev".to_string());
 
 
