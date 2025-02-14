@@ -7,9 +7,6 @@ use crate::serve::RealCommand;
 use std::path::Path;
 use std::thread;
 use eth_rpc::EthRpcInstaller;
-use std::net::TcpListener;
-use std::fs;
-use std::io::Read;
 
 pub mod serve;
 pub mod template;
@@ -154,84 +151,28 @@ fn handle_chain_spec_options(chain_spec: &str, matches: &clap::ArgMatches) {
     }
 }
 
-static CONFIG_FILE: &str = "./dot_last_used.txt"; // Store in current directory
-static BASE_PATH: &str = "./data"; // Fixed base path, no increment
-
-/// Check if a port is available
-fn is_port_available(port: u16) -> bool {
-    TcpListener::bind(("127.0.0.1", port)).is_ok()
-}
-
-/// Find the next available port starting from `start_port`
-fn find_available_port(start_port: u16) -> u16 {
-    let mut port = start_port;
-    while !is_port_available(port) {
-        port += 1;
-    }
-    port
-}
-
-fn get_last_used_values() -> (u16, u16) {
-    if Path::new(CONFIG_FILE).exists() {
-        let mut file = fs::File::open(CONFIG_FILE).expect("Failed to open config file");
-        let mut content = String::new();
-        file.read_to_string(&mut content).expect("Failed to read config file");
-
-        let parts: Vec<&str> = content.split_whitespace().collect();
-        if parts.len() == 2 {
-            if let (Ok(node_port), Ok(eth_rpc_port)) = (parts[0].parse(), parts[1].parse()) {
-                return (node_port, eth_rpc_port);
-            }
-        }
-    }
-    // Default values if no file exists
-    (9944, 8545)
-}
-
-
 fn handle_serve(matches: &clap::ArgMatches) {
-    let (mut node_port, mut eth_rpc_port) = get_last_used_values();
-
-    // Find the next available ports
-    node_port = find_available_port(node_port);
-    eth_rpc_port = find_available_port(eth_rpc_port);
-
-   // save_last_used_values(node_port, eth_rpc_port); // Save new values
-
     let mut args: Vec<String> = matches.get_one::<String>("ARGS")
         .map(|s| s.split_whitespace().map(|s| s.to_string()).collect())
-        .unwrap_or_else(|| vec![]);
+        .unwrap_or_else(|| vec![]);  
 
     if args.is_empty() {
         args = vec!["--chain".to_string(), "./chain-specs/chain_spec.json".to_string()];
     }
-    
     args.push("--base-path".to_string());
-    args.push(BASE_PATH.to_string()); // ✅ Use fixed base path
-    args.push("--rpc-port".to_string());
-    args.push(node_port.to_string());
+    args.push("/tmp/node".to_string());
     args.push("--dev".to_string());
 
-    println!("Starting omni-node on port {} with base path {}...", node_port, BASE_PATH);
-    
+
+    println!("Starting omni-node and eth-rpc concurrently...");
+
     let handle_run = thread::spawn(move || {
-        serve::run(&args.iter().map(|s| s.as_str()).collect::<Vec<&str>>());
+        serve::run(&args.iter().map(|s| s.as_str()).collect::<Vec<&str>>()); // Convert to &str slice
     });
 
     let mut real_runner_eth = RealCommand::new("./binaries/eth-rpc");
     let handle_run_eth = thread::spawn(move || {
-        let node_rpc_url = format!("ws://127.0.0.1:{}", node_port); // Ensure correct node connection
-        let binding = eth_rpc_port.to_string();
-        let eth_args = vec![
-            "--rpc-port", &binding,
-            "--node-rpc-url", &node_rpc_url  // ✅ Correct flag
-        ];
-
-        println!(
-            "Starting eth-rpc on port {} connected to node {}...",
-            eth_rpc_port, node_rpc_url
-        );
-
+        let eth_args: Vec<&str> = vec![];
         if let Err(e) = serve::run_eth(&mut real_runner_eth, &eth_args) {
             eprintln!("Error running eth-rpc: {}", e);
         }
